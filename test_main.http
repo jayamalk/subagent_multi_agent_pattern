@@ -1,0 +1,20 @@
+# Test your FastAPI endpoints
+
+GET http://127.0.0.1:8000/
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/health
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:8000/assistant
+Content-Type: application/json
+
+{
+  "message": "Schedule a meeting with the design team next Tuesday at 2pm for 1 hour and send them an email reminder."
+}
+
+###

@@ -1,0 +1,12 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "assistant": "./agents/subagent.py:make_graph"
+  },
+  "env": "./.env",
+  "http": {
+    "app": "./main.py:app"
+  }
+}
