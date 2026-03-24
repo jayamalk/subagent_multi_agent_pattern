@@ -7,24 +7,12 @@ from langchain.tools import tool
 from langgraph.types import Command
 
 from agents.reflection_agent_factory import ReflectionAgentFactory
+from config.prompt_config import (
+    get_calendar_reflection_prompt,
+    get_calendar_revision_prompt,
+    get_calendar_system_prompt,
+)
 from state.calendar_state import EventfulAgentState, build_calendar_event
-
-
-_REFLECTION_PROMPT = (
-    "You are a strict reviewer for a calendar scheduling assistant. "
-    "Check that the final assistant response accurately reflects the user request "
-    "and the tool actions. If everything is correct, reply with 'APPROVED'. "
-    "Otherwise reply with 'CRITIQUE: <specific issues and fixes>'.\n\n"
-    "Conversation:\n{transcript}"
-)
-
-_REVISION_PROMPT = (
-    "You are the calendar scheduling assistant. Revise ONLY the final assistant "
-    "response based on the critique. Do not call tools or add new actions. "
-    "Return a single corrected response.\n\n"
-    "Conversation:\n{transcript}\n\n"
-    "Critique:\n{critique}"
-)
 
 
 class CalendarAgentState(EventfulAgentState):
@@ -78,21 +66,13 @@ def build_calendar_agent(model, max_reflections: int = 1):
         model,
         tools=[create_calendar_event, get_available_time_slots],
         state_schema=CalendarAgentState,
-        system_prompt=(
-            "You are a calendar scheduling assistant. "
-            "Parse natural language scheduling requests (e.g., 'next Tuesday at 2pm') "
-            "into proper ISO datetime formats. "
-            "Use get_available_time_slots to check availability when needed. "
-            "If there is no suitable time slot, stop and confirm unavailability in your response. "
-            "Use create_calendar_event to schedule events. "
-            "Always confirm what was scheduled in your final response."
-        )
+        system_prompt=get_calendar_system_prompt(),
     )
 
     factory = ReflectionAgentFactory(
         model,
-        reflection_prompt=_REFLECTION_PROMPT,
-        revision_prompt=_REVISION_PROMPT,
+        reflection_prompt=get_calendar_reflection_prompt(),
+        revision_prompt=get_calendar_revision_prompt(),
         max_reflections=max_reflections,
     )
     return factory.build(base_calendar_agent, CalendarAgentState)

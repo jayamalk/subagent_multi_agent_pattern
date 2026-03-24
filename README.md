@@ -21,6 +21,12 @@ FastAPI + LangGraph demo with a supervisor agent that delegates to:
    - Pull a model that matches `OLLAMA_MODEL` in `.env`, for example:
      - `ollama pull qwen3.5:latest`
    - If you change the model name in `.env`, pull that model with `ollama pull <model>`.
+4. Configure LangSmith prompts:
+   - Create prompts in LangSmith (https://smith.langchain.com/prompt) using the IDs in `.env`.
+   - Set `LANGSMITH_PROMPT_OWNER` to your LangSmith workspace handle, or use `owner/prompt` in `LANGSMITH_PROMPT_*`.
+   - Update the `LANGSMITH_PROMPT_*` values in `.env` if you use different names.
+   - Ensure `LANGSMITH_API_KEY` is set so the app can pull the prompts at runtime.
+   - Optional: run `uv run python scripts/push_prompts.py` to upload the default prompts.
 
 ## Run the API
 

@@ -14,6 +14,7 @@ from config.ollama_config import (
     format_ollama_runtime_error,
     get_ollama_settings,
 )
+from config.prompt_config import get_supervisor_system_prompt
 from state.calendar_state import EventfulAgentState
 
 
@@ -93,12 +94,7 @@ def build_supervisor_agent():
         model,
         tools=[schedule_event, manage_email],
         state_schema=EventfulAgentState,
-        system_prompt=(
-            "You are a helpful personal assistant. "
-            "You can schedule calendar events and send emails. "
-            "Break down user requests into appropriate tool calls and coordinate the results. "
-            "When a request involves multiple actions, use multiple tools in sequence."
-        )
+        system_prompt=get_supervisor_system_prompt(),
     )
 
 

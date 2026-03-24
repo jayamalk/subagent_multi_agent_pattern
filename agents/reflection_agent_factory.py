@@ -1,7 +1,10 @@
 from typing import Callable
 
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.prompts import BasePromptTemplate
 from langgraph.graph import END, StateGraph
+
+PromptLike = str | BasePromptTemplate
 
 
 def _default_format_messages(messages: list) -> str:
@@ -21,8 +24,8 @@ class ReflectionAgentFactory:
     def __init__(
         self,
         model,
-        reflection_prompt: str,
-        revision_prompt: str,
+        reflection_prompt: PromptLike,
+        revision_prompt: PromptLike,
         max_reflections: int = 1,
         formatter: Callable[[list], str] | None = None,
     ) -> None:
@@ -31,6 +34,12 @@ class ReflectionAgentFactory:
         self._revision_prompt = revision_prompt
         self._max_reflections = max_reflections
         self._formatter = formatter or _default_format_messages
+
+    @staticmethod
+    def _render_prompt(prompt: PromptLike, **kwargs: str) -> str:
+        if isinstance(prompt, BasePromptTemplate):
+            return prompt.format(**kwargs)
+        return prompt.format(**kwargs)
 
     def build(self, base_agent, state_schema):
         def reflect(state) -> dict:
@@ -42,7 +51,10 @@ class ReflectionAgentFactory:
             reflection = self._model.invoke(
                 [
                     HumanMessage(
-                        content=self._reflection_prompt.format(transcript=transcript)
+                        content=self._render_prompt(
+                            self._reflection_prompt,
+                            transcript=transcript,
+                        )
                     )
                 ]
             )
@@ -59,7 +71,8 @@ class ReflectionAgentFactory:
             revised = self._model.invoke(
                 [
                     HumanMessage(
-                        content=self._revision_prompt.format(
+                        content=self._render_prompt(
+                            self._revision_prompt,
                             transcript=transcript,
                             critique=critique,
                         )
