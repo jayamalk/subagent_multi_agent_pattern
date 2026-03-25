@@ -46,7 +46,7 @@ Trajectory evals require a reachable Ollama server and a locally available model
 ## Run LangGraph Dev
 
 ```
-uv run langgraph dev
+uv run langgraph dev --allow-blocking
 ```
 
 This uses `langgraph.json` and the `assistant` graph entrypoint.

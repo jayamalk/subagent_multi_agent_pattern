@@ -35,55 +35,14 @@ def _get_prompt_name(env_var: str, default_name: str) -> str:
     _load_local_env()
     return os.getenv(env_var, default_name)
 
-
-def _get_prompt_owner() -> str | None:
-    _load_local_env()
-    for env_var in ("LANGSMITH_PROMPT_OWNER", "LANGSMITH_TENANT_HANDLE"):
-        value = os.getenv(env_var, "").strip()
-        if value:
-            return value
-    return None
-
-
-@lru_cache(maxsize=1)
-def _get_default_prompt_owner() -> str | None:
-    owner = _get_prompt_owner()
-    if owner:
-        return owner
-
-    try:
-        settings = Client()._get_settings()
-    except Exception:
-        return None
-
-    return getattr(settings, "tenant_handle", None) or None
-
-
 def _resolve_prompt_identifier(prompt_name: str) -> str:
-    if "/" in prompt_name:
-        return prompt_name
-
-    owner = _get_default_prompt_owner()
-    if owner:
-        return f"{owner}/{prompt_name}"
-
     return prompt_name
-
 
 @lru_cache(maxsize=None)
 def _pull_prompt(prompt_name: str) -> BasePromptTemplate:
     client = Client()
     prompt_identifier = _resolve_prompt_identifier(prompt_name)
-    try:
-        prompt = client.pull_prompt(prompt_identifier)
-    except Exception as exc:
-        if "/" not in prompt_identifier:
-            raise RuntimeError(
-                "LangSmith prompt owner was not specified. Set "
-                "LANGSMITH_PROMPT_OWNER to your workspace handle or use "
-                "owner/prompt in LANGSMITH_PROMPT_*."
-            ) from exc
-        raise
+    prompt = client.pull_prompt(prompt_identifier)
 
     if not isinstance(prompt, BasePromptTemplate):
         raise TypeError(
