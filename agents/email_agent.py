@@ -1,4 +1,5 @@
 from langchain.agents import create_agent
+from langchain.agents.middleware import HumanInTheLoopMiddleware, PIIMiddleware
 from langchain.tools import tool
 
 from config.prompt_config import get_email_system_prompt
@@ -20,4 +21,30 @@ def build_email_agent(model):
         model,
         tools=[send_email],
         system_prompt=get_email_system_prompt(),
+        middleware=[
+            HumanInTheLoopMiddleware(
+                interrupt_on={
+                    # Require approval for sensitive operations
+                    "send_email": True,
+                }
+            ),
+            PIIMiddleware(
+                "email",
+                strategy="redact",
+                apply_to_input=True,
+            ),
+            # Mask credit cards in user input
+            PIIMiddleware(
+                "credit_card",
+                strategy="mask",
+                apply_to_input=True,
+            ),
+            # Block API keys - raise error if detected
+            PIIMiddleware(
+                "api_key",
+                detector=r"sk-[a-zA-Z0-9]{32}",
+                strategy="block",
+                apply_to_input=True,
+            ),
+        ],
     )
