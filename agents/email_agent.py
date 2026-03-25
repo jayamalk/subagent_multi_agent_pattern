@@ -26,7 +26,7 @@ def build_email_agent(model):
             HumanInTheLoopMiddleware(
                 interrupt_on={
                     # Require approval for sensitive operations
-                    "send_email": True,
+                    "send_email": False,
                 }
             ),
             PIIMiddleware(
