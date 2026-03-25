@@ -48,7 +48,7 @@ def build_email_agent(model):
                 apply_to_input=True,
             ),
             ContentFilterMiddleware(
-                banned_keywords=["hack", "exploit", "malware"]
+                banned_keywords=["hack", "exploit", "malware", "bunnies"]
             ),
         ],
 
