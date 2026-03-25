@@ -3,6 +3,7 @@ from langchain.agents.middleware import HumanInTheLoopMiddleware, PIIMiddleware
 from langchain.tools import tool
 
 from config.prompt_config import get_email_system_prompt
+from guardrails.custom_guardrail import ContentFilterMiddleware
 
 
 @tool
@@ -46,5 +47,9 @@ def build_email_agent(model):
                 strategy="block",
                 apply_to_input=True,
             ),
+            ContentFilterMiddleware(
+                banned_keywords=["hack", "exploit", "malware"]
+            ),
         ],
+
     )
