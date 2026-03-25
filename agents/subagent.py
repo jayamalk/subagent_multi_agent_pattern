@@ -38,9 +38,35 @@ def build_supervisor_agent():
     calendar_agent = build_calendar_agent(model, max_reflections=1)
     email_agent = build_email_agent(model)
 
+    # Registry of available sub-agents
+    SUBAGENTS = {
+        "calendar": calendar_agent,
+        "email": email_agent,
+    }
+
+    @tool
+    def task(
+            agent_name: str,
+            description: str
+    ) -> str:
+        """Launch an ephemeral subagent for a task.
+
+        Available agents:
+        - calendar: Schedule calendar events using natural language
+        - email: Send emails using natural language
+        """
+        agent = SUBAGENTS[agent_name]
+        result = agent.invoke({
+            "messages": [
+                {"role": "user", "content": description}
+            ]
+        })
+        return result["messages"][-1].content
+
     # =====================================================================
     # Step 3: Wrap sub-agents as tools for the supervisor
     # =====================================================================
+
 
     @tool
     def schedule_event(
@@ -90,12 +116,23 @@ def build_supervisor_agent():
     # Step 4: Create the supervisor agent
     # =====================================================================
 
+    """ Agent registry with task dispatcher """
+    return create_agent(
+        model,
+        tools=[task],
+        state_schema=EventfulAgentState,
+        system_prompt=get_supervisor_system_prompt(),
+    )
+
+    """ Tool per agent, comment above to use this """
     return create_agent(
         model,
         tools=[schedule_event, manage_email],
         state_schema=EventfulAgentState,
         system_prompt=get_supervisor_system_prompt(),
     )
+
+
 
 
 def invoke_supervisor(request: str) -> str:
