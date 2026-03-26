@@ -1,0 +1,7 @@
+schema: spec-driven
+name: enable-email-guardrail
+description: Enable human approval guardrail for email sending
+status: completed
+archived: true
+archive_date: 2026-03-26
+

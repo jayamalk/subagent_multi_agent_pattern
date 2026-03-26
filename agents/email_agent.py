@@ -1,9 +1,10 @@
 from langchain.agents import create_agent
-from langchain.agents.middleware import HumanInTheLoopMiddleware, PIIMiddleware
+from langchain.agents.middleware import PIIMiddleware
 from langchain.tools import tool
 
+from config.ollama_config import get_email_guardrail_auto_approve
 from config.prompt_config import get_email_system_prompt
-from guardrails.custom_guardrail import ContentFilterMiddleware
+from guardrails.custom_guardrail import ContentFilterMiddleware, EmailApprovalGuardrail
 
 
 @tool
@@ -23,12 +24,7 @@ def build_email_agent(model):
         tools=[send_email],
         system_prompt=get_email_system_prompt(),
         middleware=[
-            HumanInTheLoopMiddleware(
-                interrupt_on={
-                    # Require approval for sensitive operations
-                    "send_email": False,
-                }
-            ),
+            EmailApprovalGuardrail(auto_approve=get_email_guardrail_auto_approve()),
             PIIMiddleware(
                 "email",
                 strategy="redact",

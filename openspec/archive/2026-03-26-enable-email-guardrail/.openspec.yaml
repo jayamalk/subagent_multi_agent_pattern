@@ -1,0 +1,5 @@
+schema: spec-driven
+name: enable_email_guardrail
+description: Enable human approval guardrail for email sending
+status: completed
+
