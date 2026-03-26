@@ -67,3 +67,15 @@ def build_chat_model() -> ChatOllama:
         raise RuntimeError(
             format_ollama_runtime_error(base_url, model_name)
         ) from exc
+
+
+def get_email_guardrail_auto_approve() -> bool:
+    """Get the email guardrail auto-approve setting from environment.
+
+    Returns True if email guardrail should auto-approve (typically for testing).
+    Returns False by default (requires human approval in production).
+    """
+    _load_local_env()
+    raw_value = os.getenv("EMAIL_GUARDRAIL_AUTO_APPROVE", "false").strip().lower()
+    return raw_value in {"1", "true", "yes", "on"}
+
